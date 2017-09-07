@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import solid
 import solid.utils as sutil
 import numpy as np
@@ -10,7 +11,7 @@ outer_sphere_radius = 50  # mm
 inner_sphere_radius = 10  # mm
 ommatidum_angle = 5  # deg
 ommatidum_radius = np.tan(ommatidum_angle * np.pi / 180) * outer_sphere_radius
-thickness = 0.5
+thickness = 1
 
 
 def sph2cart(radius, azimuth, elevation):
@@ -57,13 +58,19 @@ def create_ommatidum(outer_sphere_radius,
     return ommatidum
 
 
-def create_moth_eye(ommatidum, ommatidum_angle):
+def create_moth_eye(ommatidum, ommatidum_radius, sphere_radius):
     """Create moth eye using ommatidia."""
-    azimuth = np.arange(0, 180, 2 * ommatidum_angle)
-    elevation = np.arange(-45, 45, 2 * ommatidum_angle)
+    # Elevation angle correction
+    el_step = np.arctan2(
+        ommatidum_radius * np.cos(30.0 * np.pi / 180.0),
+        sphere_radius) * 180 / np.pi
+    elevation = np.arange(-45, 45, 2 * (el_step))
     moth_eye = solid.union()
 
     for el in elevation:
+        curr_radius = sphere_radius * np.cos(el * np.pi / 180)
+        az_step = np.arctan2(ommatidum_radius, curr_radius) * 180 / np.pi
+        azimuth = np.arange(0, 180, 2 * az_step)
         for az in azimuth:
             moth_eye.add(solid.rotate([0, el, az])(ommatidum))
 
@@ -72,6 +79,6 @@ def create_moth_eye(ommatidum, ommatidum_angle):
 
 ommatidum = create_ommatidum(outer_sphere_radius,
                              inner_sphere_radius, ommatidum_radius)
-moth_eye = create_moth_eye(ommatidum, ommatidum_angle)
+moth_eye = create_moth_eye(ommatidum, ommatidum_radius, outer_sphere_radius)
 solid.scad_render_to_file(moth_eye, filename,
                           file_header='$fn = %s;' % SEGMENTS)

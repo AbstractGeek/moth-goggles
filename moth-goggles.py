@@ -7,11 +7,11 @@ import numpy as np
 filename = "moth-goggles.scad"
 SEGMENTS = 20
 # Model settings
-outer_sphere_radius = 50  # mm
-inner_sphere_radius = 10  # mm
+outer_sphere_radius = 35  # mm
+inner_sphere_radius = 20  # mm
 ommatidum_angle = 5  # deg
 ommatidum_radius = np.tan(ommatidum_angle * np.pi / 180) * outer_sphere_radius
-thickness = 1
+thickness = 0.25
 
 
 def sph2cart(radius, azimuth, elevation):
